@@ -1,0 +1,96 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+function sendJson(action, data) {
+	$("#resp").toggle();
+	$.ajax({type:"POST", contentType:"application/json", url:"bridge?action="+action, data:data, success:function(result){
+		if (result.length) {
+			$(result).each(function(i, v){viewJson($("#resp"), v)});
+			} else {
+		viewJson($("#resp"), result);
+			}
+		$("#resp").toggle();
+	  },
+	  fail: function (request) {
+		  $("#resp").html(request.responseText);
+          event.preventDefault();
+          $("#resp").toggle();
+      }});
+};
+function viewJson(c, obj) {
+    var $ul = $('<ul>');
+
+    for (var prop in obj) {
+
+        var $li = $('<li>');
+        $li.append('<span class="json-key">' + prop + ': </span>');
+        if (typeof obj[prop] === "object") {
+             visitObj($li, obj[prop]);
+        } else {
+            $li.append('<span class="json-value">'+obj[prop]+'</span>');                   
+        }
+        $ul.append($li);
+    }
+   c.append($ul);
+   $ul.bind("click", function(){
+		   $(this).toggleClass("box");
+		   });
+};
+</script>
+</head>
+<body>
+	<menu>
+		<span class="title">WS-Bridge <span class="desc">SOAP REST Web Service Bridge</span></span>
+		<ul id="menu" class="topmenu">
+			<li class="topmenu"><a href="#" title="Home"
+				style="height: 24px; line-height: 24px;">Home</a></li>
+			<li class="topmenu"><a href="#" title="Routes"
+				style="height: 24px; line-height: 24px;"><span>Routes</span></a></li>
+			<li class="topmenu"><a href="#" title="Configure"
+				style="height: 24px; line-height: 24px;">Configure</a></li>
+			<li class="topmenu"><a href="#" title="Help"
+				style="height: 24px; line-height: 24px;"><span>Help</span></a>
+				<ul>
+					<li><a href="#" title="How To">How To</a></li>
+					<li><a href="#" title="Android template">About</a></li>
+				</ul></li>
+		</ul>
+	</menu>
+	<div>
+		<div class="block" >
+			<form action="bridge" method="post" enctype="application/json">
+				<div>
+					<label for="jsonAction">SOAP Action:</label>
+				</div>
+				<input id="jsonAction" value="GetProductListRequest" />
+				<div>
+					<label for="json">JSON Content:</label>
+				</div>
+				<textarea id="jsonTxt" rows="20" cols="50">{OperatingCompanyList:[{CompanyCode:"01"}]}</textarea>
+				<div>
+					<button type="button"
+						onclick="sendJson($('#jsonAction')[0].value, $('#jsonTxt')[0].value)">Send
+						JSON</button>
+				</div>
+			</form>
+		</div>
+		<div class="block">
+			<form action="bridge" method="post" enctype="text/plain">
+				<div>
+					<label for="soap">SOAP Content:</label>
+				</div>
+				<textarea id="soap" rows="20" cols="50"></textarea>
+				<div>
+					<button type="submit">Send SOAP</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="resp"></div>
+	<div id="footer">
+		<footer>WS-Bridge V1.0.0</footer>
+	</div>
+</body>
+</html>
